@@ -221,10 +221,16 @@ void TextureGPU::Store(VkCommandBuffer cmd, VkBuffer cpuBuffer, int width, int h
 	image_memory_barrier.image = viewCreateInfo.image;
 	image_memory_barrier.subresourceRange = viewCreateInfo.subresourceRange;
 
-	// submit the request to the GPU
 	// TOP_OF_PIPE is the stage that the GPU's memory is currently at, which is where all memory is initially
 	// VK_PIPELINE_STAGE_TRANSFER_BIT is the stage that we want the memory to be in, so we can transfer data to 
-	// this buffer We move the memory (defined in image_memory_barrier) from top of pipe to the transfer stage
+
+	// vkCmdPipelineBarrier is a pause in the command buffer that waits
+	// for conditions to be met before proceding. This pause will happen
+	// while the command buffer is running, which will not happen until 
+	// we execute the initCmd in Demo.cpp
+	
+	// We move the memory (defined in image_memory_barrier) from top of pipe to the transfer stage
+	// The command buffer will not proceed until this is finished
 	vkCmdPipelineBarrier(cmd,
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
@@ -257,10 +263,16 @@ void TextureGPU::Store(VkCommandBuffer cmd, VkBuffer cpuBuffer, int width, int h
 	image_memory_barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 	image_memory_barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-	// submit the request to the GPU
 	// VK_PIPELINE_STAGE_TRANSFER_BIT is the stage that the GPU's memory is currently at
 	// VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT is where memory can be accessed by the fragment shader
-	// We move the memory from transfer stage to the fragment shader
+
+	// vkCmdPipelineBarrier is a pause in the command buffer that waits
+	// for conditions to be met before proceding. This pause will happen
+	// while the command buffer is running, which will not happen until 
+	// we execute the initCmd in Demo.cpp
+	
+	// We move the memory (defined in image_memory_barrier) from top of pipe to the transfer stage
+	// The command buffer will not proceed until this is finished
 	vkCmdPipelineBarrier(cmd,
 		VK_PIPELINE_STAGE_TRANSFER_BIT,
 		VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
